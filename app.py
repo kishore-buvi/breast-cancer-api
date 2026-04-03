@@ -4,23 +4,11 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 import io
 import os
-import gdown
 
 app = Flask(__name__)
 
-MODEL_PATH = "model_best.h5"
-
-# Auto download model if not present
-if not os.path.exists(MODEL_PATH):
-    print("Downloading model from Google Drive...")
-    gdown.download(
-        "https://drive.google.com/uc?id=1ZF0Hj0wiJcHln-5_YrPXoUFjSDBz8J0Z",
-        MODEL_PATH,
-        quiet=False
-    )
-    print("Model downloaded!")
-
-model = load_model(MODEL_PATH)
+# Load model directly from repo
+model = load_model("model_best.keras")
 
 CANCER_IF_HIGH = False
 THRESHOLD = 0.3
