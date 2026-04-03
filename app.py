@@ -21,19 +21,25 @@ def home():
 def predict():
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
+
     file = request.files["file"]
+
     try:
         img_bytes = io.BytesIO(file.read())
-        img = image.load_img(img_bytes, target_size=(224, 224))
+        img = image.load_img(img_bytes, target_size=(224, 224), color_mode="rgb")
         img_array = image.img_to_array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
+
         prediction = model.predict(img_array, verbose=0)
         score = float(prediction[0][0])
+
         if CANCER_IF_HIGH:
             label = "Cancer" if score > THRESHOLD else "Normal"
         else:
             label = "Normal" if score > (1 - THRESHOLD) else "Cancer"
+
         confidence = score if label == "Normal" else 1 - score
+
         return jsonify({
             "result": label,
             "score": round(score, 4),
@@ -41,6 +47,12 @@ def predict():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/routes", methods=["GET"])
+def routes():
+    return jsonify({
+        "routes": [str(rule) for rule in app.url_map.iter_rules()]
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
